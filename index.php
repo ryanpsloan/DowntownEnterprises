@@ -61,7 +61,17 @@ session_start();
                 </table>
             </form>
         </div>
-
+        <div><?php
+            if(isset($_SESSION['output'])){
+                echo $_SESSION['output']."<br>";
+                $_SESSION['output'] = "";
+            }
+            if(isset($_SESSION['fileName'])){
+                echo "<a href='download.php'>Download</a> | ";
+                echo "<a href='clear.php'>Clear File</a><br>";
+            }
+            ?>
+        </div>
     </div>
 </main>
 </body>

@@ -83,7 +83,7 @@ if(isset($_FILES)) { //Check to see if a file is uploaded
         }
         //close file reading stream
         fclose($handle);
-        var_dump($fileData);
+        //var_dump($fileData);
         $assocData = array();
         foreach($fileData as $key => $data) {
             if($data != false) {
@@ -95,8 +95,8 @@ if(isset($_FILES)) { //Check to see if a file is uploaded
                 }
             }
         }
-        var_dump($assocData);
-        $totals = $rates = array();
+        //var_dump($assocData);
+        $totals = array();
         foreach($assocData as $id => $array){
             foreach($array as $name => $arr){
                 foreach($arr as $class => $line) {
@@ -121,17 +121,30 @@ if(isset($_FILES)) { //Check to see if a file is uploaded
             }
         }
 
-        var_dump($totals, $rates);
-
+        //var_dump($totals);
+        $output = array();
         foreach($assocData as $id => $array){
             foreach($array as $name => $arr){
                 foreach($arr as $class => $line) {
                     //var_dump($id, $name, $class);
-                    $regular = $totals[$id][$name][$class]['regular'][0];
-                    $ot = $totals[$id][$name][$class]['overtime'][0];
-                    $dt = $totals[$id][$name][$class]['dt'][0];
-                    $total = $totals[$id][$name][$class]['total'][0];
-                    $rate = $rates[$id][$name][$class]['rate'][0];
+                    $regular = $totals[$id][$name][$class]['regular']['hrs'];
+                    $ot = $totals[$id][$name][$class]['overtime']['hrs'];
+                    //$dt = $totals[$id][$name][$class]['dt']['hrs'];
+                    //$total = $totals[$id][$name][$class]['total']['hrs'];
+                    $rate = $totals[$id][$name][$class]['total']['rate'];
+
+                    if($regular > 0){
+                        $code = '01';
+                        if($class === 'Server' || $class === 'Server-MOD') {
+                            if($rate > 8.80) {
+                                $code = '61';
+                            }
+                        }
+                        $output[] = array($id,'','','','',"E",$code,(string) $rate, (string) $regular,'','','','','','','','','','','','','','','','','','','','');
+                    }
+                    if($ot > 0){
+                        $output[] = array($id,'','','','',"E",'02',(string) $rate, (string) $ot,'','','','','','','','','','','','','','','','','','','','');
+                    }
                 }
             }
         }
@@ -149,6 +162,7 @@ if(isset($_FILES)) { //Check to see if a file is uploaded
         fclose($handle);
         $_SESSION['fileName'] = $fileName;
         $_SESSION['output'] = "Files Successfully Created";
+        header('Location: index.php');
     }catch(Exception $e){
         $_SESSION['output'] = $e->getMessage();
         header('Location: index.php');
