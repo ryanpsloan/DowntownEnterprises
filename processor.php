@@ -88,11 +88,14 @@ if(isset($_FILES)) { //Check to see if a file is uploaded
         foreach($fileData as $key => $data) {
             if($data != false) {
                 $result = array_filter($data, 'strlen');
-                if (count($result) >= 13) {
+                if (count($result) === 14) {
                     $assocData[$data[0]][$data[1]][$data[2]][] = $tempArr = array("ID" => $data[0], "Employee" => $data[1], "Class" => $data[2], "Time In" => $data[3], "Time Out" => $data[4], "Total Hrs" => floatval($data[5]), "Reg Hrs" => floatval($data[6]), "OT Hrs" => floatval($data[7]), "DT Hrs" => floatval($data[8]), "Total Paid" => floatval(str_replace("$","",trim($data[9]))), "Reg Paid" => floatval(str_replace("$","",trim($data[10]))), "OT Paid" => floatval(str_replace("$","",trim($data[11]))), "DT Paid" => floatval(str_replace("$","",trim($data[12]))), "Rate" => isset($data[13]) ? floatval(str_replace("$","",trim($data[13]))) : null);
                     if($tempArr['Rate'] == null){
-                        throw new Exception('Rate is null. Please  ensure the rate column is populated.');
+                        throw new Exception('Rate is null. Line $key Please  ensure the rate column is populated.');
                     }
+                }else{
+                    throw new Exception('Missing a column.');
+
                 }
             }
         }
