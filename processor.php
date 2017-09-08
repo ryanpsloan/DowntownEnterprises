@@ -88,10 +88,11 @@ if(isset($_FILES)) { //Check to see if a file is uploaded
         foreach($fileData as $key => $data) {
             if($data != false) {
                 $result = array_filter($data, 'strlen');
-                if (count($result) === 14) {
-
-                    $assocData[$data[0]][$data[1]][$data[2]][] = array("ID" => $data[0], "Employee" => $data[1], "Class" => $data[2], "Time In" => $data[3], "Time Out" => $data[4], "Total Hrs" => floatval($data[5]), "Reg Hrs" => floatval($data[6]), "OT Hrs" => floatval($data[7]), "DT Hrs" => floatval($data[8]), "Total Paid" => floatval(str_replace("$","",trim($data[9]))), "Reg Paid" => floatval(str_replace("$","",trim($data[10]))), "OT Paid" => floatval(str_replace("$","",trim($data[11]))), "DT Paid" => floatval(str_replace("$","",trim($data[12]))), "Rate" => floatval(str_replace("$","",trim($data[13]))));
-
+                if (count($result) >= 13) {
+                    $assocData[$data[0]][$data[1]][$data[2]][] = $tempArr = array("ID" => $data[0], "Employee" => $data[1], "Class" => $data[2], "Time In" => $data[3], "Time Out" => $data[4], "Total Hrs" => floatval($data[5]), "Reg Hrs" => floatval($data[6]), "OT Hrs" => floatval($data[7]), "DT Hrs" => floatval($data[8]), "Total Paid" => floatval(str_replace("$","",trim($data[9]))), "Reg Paid" => floatval(str_replace("$","",trim($data[10]))), "OT Paid" => floatval(str_replace("$","",trim($data[11]))), "DT Paid" => floatval(str_replace("$","",trim($data[12]))), "Rate" => isset($data[13]) ? floatval(str_replace("$","",trim($data[13]))) : null);
+                    if($tempArr['Rate'] == null){
+                        throw new Exception('Rate is null. Please  ensure the rate column is populated.');
+                    }
                 }
             }
         }
@@ -131,7 +132,7 @@ if(isset($_FILES)) { //Check to see if a file is uploaded
                     $ot = $totals[$id][$name][$class]['overtime']['hrs'];
                     //$dt = $totals[$id][$name][$class]['dt']['hrs'];
                     //$total = $totals[$id][$name][$class]['total']['hrs'];
-                    $rate = $totals[$id][$name][$class]['total']['rate'];
+                    $rate = $totals[$id][$name][$class]['total']['rate'] !== null ? $totals[$id][$name][$class]['total']['rate'] : '' ;
 
                     if($regular > 0){
                         $code = '01';
@@ -140,10 +141,14 @@ if(isset($_FILES)) { //Check to see if a file is uploaded
                                 $code = '61';
                             }
                         }
-                        $output[] = array($id,'','','','',"E",$code,(string) $rate, (string) $regular,'','','','','','','','','','','','','','','','','','','','');
+                        $output[] = array($id,'','','','','E',$code,(string) $rate, (string) $regular,'','','','','','','','','','','','','','','','','','','','');
                     }
                     if($ot > 0){
-                        $output[] = array($id,'','','','',"E",'02',(string) $rate, (string) $ot,'','','','','','','','','','','','','','','','','','','','');
+                        $code = '02';
+                        if($rate > 8.80) {
+                            $code = '62';
+                        }
+                        $output[] = array($id,'','','','','E',$code,(string) $rate, (string) $ot,'','','','','','','','','','','','','','','','','','','','');
                     }
                 }
             }
@@ -162,13 +167,14 @@ if(isset($_FILES)) { //Check to see if a file is uploaded
         fclose($handle);
         $_SESSION['fileName'] = $fileName;
         $_SESSION['output'] = "Files Successfully Created";
+        $_SESSION['empCount'] = count($assocData);
         header('Location: index.php');
     }catch(Exception $e){
-        $_SESSION['output'] = $e->getMessage();
+        $_SESSION['error'] = $e->getMessage();
         header('Location: index.php');
     }
 }else{
-    $_SESSION['output'] = "<p>No File Was Selected</p>";
+    $_SESSION['error'] = "<p>No File Was Selected</p>";
     header('Location: index.php');
 }
 

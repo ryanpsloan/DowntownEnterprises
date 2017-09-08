@@ -62,14 +62,24 @@ session_start();
             </form>
         </div>
         <div><?php
+            if(isset($_SESSION['error'])){
+                echo '<p style="color: red"><b>'.$_SESSION['error'].'</b></p><br>';
+                $_SESSION['error'] = "";
+            }
             if(isset($_SESSION['output'])){
-                echo $_SESSION['output']."<br>";
+                echo '<p style="color: green"><b>'.$_SESSION['output'].'</b></p><br>';
                 $_SESSION['output'] = "";
+            }
+            if(isset($_SESSION['empCount'])){
+                echo "<p>Employee Count: " . $_SESSION['empCount']."</p><br><br>";
+
             }
             if(isset($_SESSION['fileName'])){
                 echo "<a href='download.php'>Download</a> | ";
-                echo "<a href='clear.php'>Clear File</a><br>";
+                echo "<a href='clear.php'>Clear File</a><br><br><br>";
             }
+
+
             ?>
         </div>
     </div>
