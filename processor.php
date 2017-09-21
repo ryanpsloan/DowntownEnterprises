@@ -227,7 +227,7 @@ if(isset($_FILES)) { //Check to see if a file is uploaded
         $_SESSION['empCount'] = count($assocData);
         $_SESSION['totPaid'] = array_sum($totalPaid);
         $_SESSION['totHrs'] = round(array_sum($totalHrs),2);
-        $_SESSION['errorLog'] = '';
+        $_SESSION['errorLog'] = null;
         header('Location: index.php');
     }catch(Exception $e){
         $_SESSION['error'] = $e->getMessage();
