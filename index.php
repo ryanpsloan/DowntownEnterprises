@@ -67,12 +67,25 @@ session_start();
                 echo '<p style="color: red"><b>'.$_SESSION['error'].'</b></p><br>';
                 $_SESSION['error'] = "";
             }
+            if(isset($_SESSION['errorLog'])){
+                echo "<a href='downloadErrorLog.php'>Download Error Log</a> |  <a href='clear.php'>Clear File</a>";
+                $_SESSION['errorLog'] = '';
+            }
             if(isset($_SESSION['output'])){
                 echo '<p style="color: green"><b>'.$_SESSION['output'].'</b></p><br>';
                 $_SESSION['output'] = "";
             }
             if(isset($_SESSION['empCount'])){
                 echo "<p>Employee Count: " . $_SESSION['empCount']."</p><br><br>";
+                $_SESSION['empCount'] = '';
+            }
+            if(isset($_SESSION['totPaid'])){
+                echo "<p>Total Paid: " . $_SESSION['totPaid']."</p><br><br>";
+                $_SESSION['totPaid'] = '';
+            }
+            if(isset($_SESSION['totHrs'])){
+                echo "<p>Total Hours: " . $_SESSION['totHrs']."</p><br><br>";
+                $_SESSION['totHrs'] = '';
 
             }
             if(isset($_SESSION['fileName'])){

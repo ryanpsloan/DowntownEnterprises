@@ -73,7 +73,9 @@ if(isset($_FILES)) { //Check to see if a file is uploaded
             fwrite($log, "Unable to Rename File: $name" . PHP_EOL);
             throw new RuntimeException("Unable to Rename File: $name");
         }
-        $handle = fopen($newName, "r");
+        if(!$handle = fopen($newName, "r")){
+            throw new Exception('Unable to open writing stream');
+        }
         $headers = fgets($handle);
         //var_dump($headers);
         $fileData = array();
@@ -85,22 +87,72 @@ if(isset($_FILES)) { //Check to see if a file is uploaded
         fclose($handle);
         //var_dump($fileData);
         $assocData = array();
+
+        function fileAnalysisAndLog($passedFile){
+            //open a log file
+            if(!$handle = fopen('errorLog.txt', 'w')){
+                throw new Exception('Unable to create Error Log');
+            }
+            $errorCount = 0;
+            $errorFound = false;
+            $today = date('Y-m-d H:i:s');
+            fwrite($handle, 'Time of Execution: ' . $today ."\r\n");
+
+            //var_dump($passedFile);
+            foreach($passedFile as $key => $array){
+                if($array != false){
+                    if(count($array) == 14){
+                        for($i = 0; $i < 14; $i++){
+                            if(!isset($array[$i])){
+                                //Document which position and which line
+                                $str = 'Row: ' . ($key + 1). ' | Column:' . $i . " | Value for this cell is not set.\r\n";
+                                fwrite($handle, $str);
+                                $errorFound = true;
+                                $errorCount++;
+                            }
+                            if($i == 13 && trim($array[13]) == ''){
+                                fwrite($handle, 'Row: ' . ($key+1) . " Is missing a rate in the rate column.\r\n");
+                                $errorFound = true;
+                                $errorCount++;
+                            }
+                        }
+                    }else{
+                        //not a good line
+                        //document line number and count
+                        fwrite($handle, 'Row: '. ($key + 1) .' is missing some columns. Column count: ' . count($array)."\r\n");
+                        $errorFound = true;
+                        $errorCount++;
+                        var_dump($array);
+                    }
+
+                }
+
+            }
+            fwrite($handle, 'Error Count: '. $errorCount);
+            fclose($handle);
+            return $errorFound;
+        }
+
+        if(fileAnalysisAndLog($fileData)){
+            $_SESSION['errorLog'] = true;
+            $_SESSION['errorFileName'] = 'errorLog.txt';
+
+            throw new Exception('Error(s) found in file. Check the log by clicking the download error log button');
+        }
         foreach($fileData as $key => $data) {
+            //var_dump($data == false);
             if($data != false) {
                 $result = array_filter($data, 'strlen');
                 if (count($result) === 14) {
                     $assocData[$data[0]][$data[1]][$data[2]][] = $tempArr = array("ID" => $data[0], "Employee" => $data[1], "Class" => $data[2], "Time In" => $data[3], "Time Out" => $data[4], "Total Hrs" => floatval($data[5]), "Reg Hrs" => floatval($data[6]), "OT Hrs" => floatval($data[7]), "DT Hrs" => floatval($data[8]), "Total Paid" => floatval(str_replace("$","",trim($data[9]))), "Reg Paid" => floatval(str_replace("$","",trim($data[10]))), "OT Paid" => floatval(str_replace("$","",trim($data[11]))), "DT Paid" => floatval(str_replace("$","",trim($data[12]))), "Rate" => isset($data[13]) ? floatval(str_replace("$","",trim($data[13]))) : null);
-                    if($tempArr['Rate'] == null){
-                        throw new Exception('Rate is null. Employee: ' . $data[0] . '  Please ensure the rate column is populated.');
-                    }
-                }else{
-                    throw new Exception('Missing a column.');
 
+                }else{
+                    $runtimeExceptions['count result'][] = array(count($result), $result);
                 }
             }
         }
         //var_dump($assocData);
-        $totals = array();
+        $totals = $totalPaid = $totalHrs = array();
         foreach($assocData as $id => $array){
             foreach($array as $name => $arr){
                 foreach($arr as $class => $line) {
@@ -109,12 +161,12 @@ if(isset($_FILES)) { //Check to see if a file is uploaded
                     $totals[$id][$name][$class]['regular']['hrs'] = array_sum(array_column($line, 'Reg Hrs'));
                     $totals[$id][$name][$class]['overtime']['hrs'] = array_sum(array_column($line, 'OT Hrs'));
                     $totals[$id][$name][$class]['dt']['hrs'] = array_sum(array_column($line, 'DT Hrs'));
-                    $totals[$id][$name][$class]['total']['hrs'] = array_sum(array_column($line, 'Total Hrs'));
+                    $totals[$id][$name][$class]['total']['hrs'] = $totalHrs[] = array_sum(array_column($line, 'Total Hrs'));
 
                     $totals[$id][$name][$class]['regular']['paid'] = array_sum(array_column($line, 'Reg Paid'));
                     $totals[$id][$name][$class]['overtime']['paid'] = array_sum(array_column($line, 'OT Paid'));
                     $totals[$id][$name][$class]['dt']['paid'] = array_sum(array_column($line, 'DT Paid'));
-                    $totals[$id][$name][$class]['total']['paid'] = array_sum(array_column($line, 'Total Paid'));
+                    $totals[$id][$name][$class]['total']['paid'] = $totalPaid[] = array_sum(array_column($line, 'Total Paid'));
 
                     //$totals[$id][$name][$class]['regular']['rate'] = trim(array_unique(array_column($line, 'Rate'))[0]);
                     //$totals[$id][$name][$class]['overtime']['rate'] = trim(array_unique(array_column($line, 'Rate'))[0]);
@@ -124,7 +176,8 @@ if(isset($_FILES)) { //Check to see if a file is uploaded
                 }
             }
         }
-
+        //var_dump($totalHrs);
+        //var_dump($totalPaid);
         //var_dump($totals);
         $output = array();
         foreach($assocData as $id => $array){
@@ -171,6 +224,9 @@ if(isset($_FILES)) { //Check to see if a file is uploaded
         $_SESSION['fileName'] = $fileName;
         $_SESSION['output'] = "Files Successfully Created";
         $_SESSION['empCount'] = count($assocData);
+        $_SESSION['totPaid'] = array_sum($totalPaid);
+        $_SESSION['totHrs'] = round(array_sum($totalHrs),2);
+        $_SESSION['errorLog'] = '';
         header('Location: index.php');
     }catch(Exception $e){
         $_SESSION['error'] = $e->getMessage();
