@@ -103,15 +103,16 @@ if(isset($_FILES)) { //Check to see if a file is uploaded
                 if($array != false){
                     if(count($array) == 14){
                         for($i = 0; $i < 14; $i++){
-                            if(!isset($array[$i])){
+                            $var = trim($array[$i]);
+                            if(!isset($var)){
                                 //Document which position and which line
-                                $str = 'Row: ' . ($key + 1). ' | Column:' . $i . " | Value for this cell is not set.\r\n";
+                                $str = 'Row: ' . ($key + 2). ' | Column:' . $i . " | Value for this cell is not set.\r\n";
                                 fwrite($handle, $str);
                                 $errorFound = true;
                                 $errorCount++;
                             }
                             if($i == 13 && trim($array[13]) == ''){
-                                fwrite($handle, 'Row: ' . ($key+1) . " Is missing a rate in the rate column.\r\n");
+                                fwrite($handle, 'Row: ' . ($key+2) . " Is missing a rate in the rate column.\r\n");
                                 $errorFound = true;
                                 $errorCount++;
                             }
@@ -119,7 +120,7 @@ if(isset($_FILES)) { //Check to see if a file is uploaded
                     }else{
                         //not a good line
                         //document line number and count
-                        fwrite($handle, 'Row: '. ($key + 1) .' is missing some columns. Column count: ' . count($array)."\r\n");
+                        fwrite($handle, 'Row: '. ($key + 2) .' is missing some columns. Column count: ' . count($array)."\r\n");
                         $errorFound = true;
                         $errorCount++;
                         var_dump($array);
