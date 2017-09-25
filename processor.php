@@ -194,7 +194,7 @@ if(isset($_FILES)) { //Check to see if a file is uploaded
                     if($regular > 0){
                         $code = '01';
                         if($class === 'Server' || $class === 'Server-MOD') {
-                            if($rate > 8.80) {
+                            if($rate < 8.80) {
                                 $code = '61';
                             }
                         }
@@ -202,7 +202,7 @@ if(isset($_FILES)) { //Check to see if a file is uploaded
                     }
                     if($ot > 0){
                         $code = '02';
-                        if($rate > 8.80) {
+                        if($rate < 8.80) {
                             $code = '62';
                         }
                         $output[] = array($id,'','','','','E',$code,(string) $rate, (string) $ot,'','','','','','','','','','','','','','','','','','','','');
