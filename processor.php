@@ -190,6 +190,56 @@ if(isset($_FILES)) { //Check to see if a file is uploaded
                     //$dt = $totals[$id][$name][$class]['dt']['hrs'];
                     //$total = $totals[$id][$name][$class]['total']['hrs'];
                     $rate = $totals[$id][$name][$class]['total']['rate'] !== null ? $totals[$id][$name][$class]['total']['rate'] : '' ;
+                    $dept = '';
+                    switch($class){
+                        case 'Corporate Salary':
+                            $dept = '100';
+                            break;
+                        case 'Office Administration':
+                            $dept = '101';
+                            break;
+                        case 'Production':
+                            $dept = '111';
+                            break;
+                        case 'Server':
+                            $dept = '160';
+                            break;
+                        case 'Server-MOD':
+                            $dept = '170';
+                            break;
+                        case 'Production-MOD':
+                            $dept = '180';
+                            break;
+                        case 'Training':
+                            $dept = '190';
+                            break;
+                        case 'Busser':
+                            $dept = '400';
+                            break;
+                        case 'Cashier':
+                            $dept = '500';
+                            break;
+                        case 'Cook':
+                            $dept = '600';
+                            break;
+                        case 'Corporate Admin':
+                            $dept = '700';
+                            break;
+                        case 'Delivery Driver':
+                            $dept = '800';
+                            break;
+                        case 'Driver':
+                            $dept = '800';
+                            break;
+                        case 'Hourly Manager':
+                            $dept = '900';
+                            break;
+                        case 'Maintenance':
+                            $dept = '';
+                            break;
+                        default:
+                            $dept = '';
+                    }
 
                     if($regular > 0){
                         $code = '01';
@@ -198,14 +248,15 @@ if(isset($_FILES)) { //Check to see if a file is uploaded
                                 $code = '61';
                             }
                         }
-                        $output[] = array($id,'','','','','E',$code,(string) $rate, (string) $regular,'','','','','','','','','','','','','','','','','','','','');
+                        $output[] = array($id,'',$dept,'','','E',$code,(string) $rate, (string) $regular,'','','','','','','','','','','','','','','','','','','','');
                     }
+
                     if($ot > 0){
                         $code = '02';
                         if($rate < 8.80) {
                             $code = '62';
                         }
-                        $output[] = array($id,'','','','','E',$code,(string) $rate, (string) $ot,'','','','','','','','','','','','','','','','','','','','');
+                        $output[] = array($id,'',$dept,'','','E',$code,(string) $rate, (string) $ot,'','','','','','','','','','','','','','','','','','','','');
                     }
                 }
             }
