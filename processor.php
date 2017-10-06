@@ -235,7 +235,7 @@ if(isset($_FILES)) { //Check to see if a file is uploaded
                             $dept = '900';
                             break;
                         case 'Maintenance':
-                            $dept = '';
+                            $dept = '200';
                             break;
                         default:
                             $dept = '';
@@ -247,6 +247,12 @@ if(isset($_FILES)) { //Check to see if a file is uploaded
                             if($rate < 8.80) {
                                 $code = '61';
                             }
+                        }else if($class === 'Driver'){
+                            if($rate == 7.00){
+                                $code = '61';
+                            }
+                        }else if($class === 'Training'){
+                            $code = '12';
                         }
                         $output[] = array($id,'',$dept,'','','E',$code,(string) $rate, (string) $regular,'','','','','','','','','','','','','','','','','','','','');
                     }
